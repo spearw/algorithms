@@ -1,17 +1,21 @@
 from math import dist
+import time
 
 import itertools
 
 
 def tsp(graph, precision=2):
+    start_time = time.time()
+
     num_cities = len(graph)
     subsets = gen_subsets(num_cities)
     final_path = float('inf')
     paths = [[]]
 
     # Generate base cases
-    for i in range(0, num_cities):
-        paths[0].append([graph[0][i], 0])
+    paths[0] = list(map(lambda x: [x, 0], graph[0]))
+
+    print(f"Based cases completed in --- {time.time() - start_time} seconds ---")
 
     # Iterate over increasing path lengths
     for i in range(1, num_cities - 1):
@@ -42,11 +46,13 @@ def tsp(graph, precision=2):
                     elif len(path) > i:
                         # Move on to next city_set
                         pass
+        print(f"Path of length {i} completed in --- {time.time() - start_time} seconds ---")
 
     # Calculate final hop
     for path in paths[-1]:
         final_path = min(final_path, paths[0][int(str(path)[0])][0] + paths[-1][path][0])
 
+    print(f"TSP of {num_cities} cities completed in --- {time.time() - start_time} seconds ---")
     return round(final_path, precision)
 
 def gen_subsets(num_cities):
@@ -83,4 +89,5 @@ def calc_euclidean_distances(path):
 
 
 if __name__ == "__main__":
-    print(tsp(calc_euclidean_distances("dat/tsp/tsp.txt")))
+    # print(tsp(calc_euclidean_distances("dat/tsp/tsp.txt")))
+    print(tsp(calc_euclidean_distances("dat/tsp/t2.txt")))
