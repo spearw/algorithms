@@ -121,13 +121,16 @@ public class tsp {
         // 3d array - number of hops, destination city, combination of cities leading to destination city
         Integer[][][] combinations = new Integer[n-1][n][0];
 
-        // Allocate combintations memory
+        // Allocate combinations memory
         // Combinations are maxed by n1 choose r, where n1 is n - 1, and k is number of hops
         for (int i = 0; i < n-1; i++){
             for (int j = 0; j < n; j++){
                 combinations[i][j] = new Integer[choose(n-1,i + 1)];
             }
         }
+
+        System.out.println("Memory Allocated");
+        System.out.println("Time Elapsed: " + (System.nanoTime() - startTime) + " Nanoseconds");
 
         // Run a loop from 1 to 2^n
         for (int i = 1; i < (1 << n); i++) {
@@ -152,6 +155,9 @@ public class tsp {
                 }
             }
         }
+
+        System.out.println("Sets calculated");
+        System.out.println("Time Elapsed: " + (System.nanoTime() - startTime) + " Nanoseconds");
 
         return combinations;
     }
