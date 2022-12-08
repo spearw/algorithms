@@ -19,7 +19,7 @@ public class tsp {
 
         startTime = System.nanoTime();
         tsp tsp = new tsp();
-        String[] data = tsp.readFile("dat/tsp/t2.txt");
+        String[] data = tsp.readFile("dat/tsp/tsp.txt");
         Double[][] euclideanDistances = tsp.calculateEuclideanDistances(data);
         Integer[][][] sets = tsp.generateSets();
 
@@ -122,10 +122,10 @@ public class tsp {
         Integer[][][] combinations = new Integer[n-1][n][0];
 
         // Allocate combintations memory
-        // Combinations are maxed by n1 choose r, where n1 is n - 1, and r is number of hops
+        // Combinations are maxed by n1 choose r, where n1 is n - 1, and k is number of hops
         for (int i = 0; i < n-1; i++){
             for (int j = 0; j < n; j++){
-                combinations[i][j] = new Integer[nCr(n-1,i + 1)];
+                combinations[i][j] = new Integer[choose(n-1,i + 1)];
             }
         }
 
@@ -156,24 +156,15 @@ public class tsp {
         return combinations;
     }
 
-    // Returns n choose r
-    static int nCr(int n, int r)
-    {
-        return fact(n) / (fact(r) *
-                fact(n - r));
-    }
-
-    // Returns factorial of n
-    static int fact(int n)
-    {
-        if(n==0)
+    // Returns n choose k
+    private int choose(int n, int k){
+        if (k == 0){
             return 1;
-        int res = 1;
-        for (int i = 2; i <= n; i++)
-            res = res * i;
-        return res;
+        }
+        else{
+            return (n * choose(n - 1, k - 1)) / k;
+        }
     }
-
     private String[] readFile(String path){
 
         BufferedReader reader;
