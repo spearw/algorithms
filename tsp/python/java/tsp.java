@@ -17,7 +17,7 @@ public class tsp {
 
         startTime = System.nanoTime();
         tsp tsp = new tsp();
-        String[] data = tsp.readFile("dat/tsp/t2.txt");
+        String[] data = tsp.readFile("dat/tsp/tsp.txt");
         Double[][] euclideanDistances = tsp.calculateEuclideanDistances(data);
         Integer[][][] sets = tsp.generateSets();
 
@@ -193,9 +193,13 @@ public class tsp {
     private Double[][] calculateEuclideanDistances(String[] data){
 
         numCities = Integer.parseInt(data[0]);
-        expectedAnswer = Double.parseDouble(data[data.length-1].replaceAll("[^\\d.]", ""));
-
-        System.out.println("Expected Answer: " + expectedAnswer);
+        try {
+            expectedAnswer = Double.parseDouble(data[data.length-1].replaceAll("[^\\d.]", ""));
+            System.out.println("Expected Answer: " + expectedAnswer);
+        }
+        catch(Exception e) {
+            System.out.println("Expected Answer Unknown");
+        }
 
         List<Point2D> city_coords = new ArrayList<Point2D>();
 
