@@ -1,5 +1,7 @@
 package tsp.python.java;
 
+import sun.security.util.Length;
+
 import java.awt.geom.Point2D;
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -17,7 +19,7 @@ public class tsp {
 
         startTime = System.nanoTime();
         tsp tsp = new tsp();
-        String[] data = tsp.readFile("dat/tsp/tsp.txt");
+        String[] data = tsp.readFile("dat/tsp/t2.txt");
         Double[][] euclideanDistances = tsp.calculateEuclideanDistances(data);
         Integer[][][] sets = tsp.generateSets();
 
@@ -56,7 +58,7 @@ public class tsp {
                     // Get bitmask set
                     int set = sets[i][j][k];
                     // Init array for holding possible path lengths
-                    Double[] lengths = new Double[32];
+                    Double[] lengths = new Double[i + 1];
                     // Iterate through cities in bitmask
                     for (int l = 31; l >= 0; l--) {
                         int bit = (set >> l) & 1;
@@ -78,14 +80,6 @@ public class tsp {
                         }
                     }
 
-
-                    // Remove null values
-                    // TODO: calculate exact size ahead of time
-                    for (int l = 0; l < lengths.length; l++){
-                        lengths = Arrays.stream(lengths)
-                                .filter(s -> (s != null))
-                                .toArray(Double[]::new);
-                    }
                     List<Double> dList = Arrays.asList(lengths);
                     Double min = Collections.min(dList);
 
@@ -125,7 +119,15 @@ public class tsp {
 
         // Combinations sorted by number of hops
         // 3d array - number of hops, destination city, combination of cities leading to destination city
-        Integer[][][] combinations = new Integer[n-1][n][numCombos];
+        Integer[][][] combinations = new Integer[n-1][n][0];
+
+        // Allocate combintations memory
+        // Combinations are maxed by n1 choose r, where n1 is n - 1, and r is number of hops
+        for (int i = 0; i < n-1; i++){
+            for (int j = 0; j < n; j++){
+                combinations[i][j] = new Integer[nCr(n-1,i + 1)];
+            }
+        }
 
         // Run a loop from 1 to 2^n
         for (int i = 1; i < (1 << n); i++) {
@@ -151,17 +153,25 @@ public class tsp {
             }
         }
 
-        // Remove null values
-        // TODO: calculate exact size ahead of time
-        for (int i = 0; i < combinations.length; i++){
-            for (int j = 0; j < combinations[i].length; j++){
-                combinations[i][j] = Arrays.stream(combinations[i][j])
-                        .filter(s -> (s != null))
-                        .toArray(Integer[]::new);
-            }
-        }
-
         return combinations;
+    }
+
+    // Returns n choose r
+    static int nCr(int n, int r)
+    {
+        return fact(n) / (fact(r) *
+                fact(n - r));
+    }
+
+    // Returns factorial of n
+    static int fact(int n)
+    {
+        if(n==0)
+            return 1;
+        int res = 1;
+        for (int i = 2; i <= n; i++)
+            res = res * i;
+        return res;
     }
 
     private String[] readFile(String path){
