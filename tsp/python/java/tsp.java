@@ -17,9 +17,9 @@ public class tsp {
 
         startTime = System.nanoTime();
         tsp tsp = new tsp();
-        String[] data = tsp.readFile("dat/tsp/tsp.txt");
+        String[] data = tsp.readFile("dat/tsp/t2.txt");
         Double[][] euclideanDistances = tsp.calculateEuclideanDistances(data);
-        Integer[][][] sets = tsp.generateSets();
+        Integer[][] sets = tsp.generateSets();
 
         Double answer = tsp.tsp(euclideanDistances, sets);
 
@@ -27,11 +27,14 @@ public class tsp {
         System.out.println("Time Elapsed: " + (System.nanoTime() - startTime) + " Nanoseconds");
     }
 
-    private Double tsp(Double[][] distances, Integer[][][] sets){
+    private Double tsp(Double[][] distances, Integer[][] sets){
 
-        // Create array large enough to avoid overflowing
         // Destination city index, path length indexed by bitmap value of cities leading to destination
         // No reason to include number of hops, since inherent in bitmap, and sets will insure I solve smalled subproblems first
+        // Can I save memory here? Each city inherently has an even distribution. I think it's smaller than this (this.numCities -1?). Even -1 would half the memory used.
+        // Cannot use index as bitmask maps if this is case. Look into hashmap solution
+        // Can also throw away solutions after they're not needed. Solving 1 requires 0, solving 2 requires 1, etc.
+        // Will make sense to wait to allocate only the memory needed, so create new array each loop, with the number of subproblems solved for that pathlength and a hashmap
         Double[][] pathLengths = new Double[this.numCities - 1][1 << this.numCities];
 
         // Storing final path lengths for each city for convenience
@@ -49,28 +52,45 @@ public class tsp {
         // Iterate over increasing path lengths
         for (int i = 0; i < sets.length; i++){
             // Iterate over destination cities
-            for (int j = 0; j < sets[i].length; j++){
+            for (int j = 0; j < pathLengths.length; j++){
                 // Calculate shortest path and enter it into pathLengths
-                for (int k = 0; k < sets[i][j].length; k++){
+                for (int k = 0; k < sets[i].length; k++){
 
-                    // Get bitmask set
-                    int set = sets[i][j][k];
+                    // Get bitmask
+                    int bitmask = sets[i][k];
+
+                    // Get bit representation of current city
+                    int mask = (1<<j);
+
+                    // Skip bitmask if it contains destination city
+                    if ((mask & bitmask) == mask) {
+                        continue;
+                    }
+
                     // Init array for holding possible path lengths
                     Double[] lengths = new Double[i + 1];
+                    // Init counter to break loop when lengths is full
+                    int counter = 0;
                     // Iterate through cities in bitmask
                     for (int l = 31; l >= 0; l--) {
-                        int bit = (set >> l) & 1;
+                        // If lengths is full, break this loop
+                        if (counter == lengths.length){
+                            break;
+                        }
+                        int bit = (bitmask >> l) & 1;
                         if (bit == 1){
 
                             // 1 << j will be bitwise representation of single city. Invert and call and to get set excluding current city
                             // final hop distance indexes are +1 because distances includes starting city
                             // Combine path length and final hop to get total distance
-                            double len = pathLengths[l][(~(1<<l) & set)] + distances[l+1][j+1];
+                            double len = pathLengths[l][(~(1<<l) & bitmask)] + distances[l+1][j+1];
 
                             // Fill first available slot
                             for (int p = 0; p < lengths.length; p++){
                                 if(lengths[p] == null){
                                     lengths[p] = len;
+                                    // Increment counter
+                                    counter++;
                                     break;
                                 }
                             }
@@ -82,7 +102,7 @@ public class tsp {
                     Double min = Collections.min(dList);
 
                     // Adding index based on mask used to create path length
-                    pathLengths[j][set] = min;
+                    pathLengths[j][bitmask] = min;
 
                     // Overriding per city - we only care about last value here
                     finalLengths[j] = min;
@@ -107,7 +127,7 @@ public class tsp {
         return finalMin;
     }
 
-    private Integer[][][] generateSets() {
+    private Integer[][] generateSets() {
         // Sort bitmask sets by bitcount (Hamming Weight)
         // Next, we'll iterate through them for each city, ignoring sets that have their own city flipped
 
@@ -117,39 +137,28 @@ public class tsp {
 
         // Combinations sorted by number of hops
         // 3d array - number of hops, destination city, combination of cities leading to destination city
-        Integer[][][] combinations = new Integer[n-1][n][0];
+        Integer[][] combinations = new Integer[n -1][0];
 
         // Allocate combinations memory
-        // Combinations are maxed by n1 choose r, where n1 is n - 1, and k is number of hops
-        for (int i = 0; i < n-1; i++){
-            for (int j = 0; j < n; j++){
-                combinations[i][j] = new Integer[choose(n-1,i + 1)];
-            }
+        // Combinations are maxed by n choose k, and k is number of hops
+        for (int i = 0; i < n -1; i++){
+                combinations[i] = new Integer[choose(n,i + 1)];
         }
 
         System.out.println("Memory Allocated");
         System.out.println("Time Elapsed: " + (System.nanoTime() - startTime) + " Nanoseconds");
 
         // Run a loop from 1 to 2^n
-        for (int i = 1; i < (1 << n); i++) {
+        for (int i = 1; i < (1 << n) - 1; i++) {
 
-            // Create set for each destination city
-            for (int j = 0; j < n; j++){
-                // Discount sets that have destination city included in combination of cities leading to destination
-                int bitwiseCity = (1 << j);
-                if ((bitwiseCity & i) == bitwiseCity){
-                    continue;
-                }
-
-                // Index by path length. -1 because no 0 length paths
-                int lengthIndex = Integer.bitCount(i) - 1;
-                for(int k = 0; k<numCombos; k++) {
-                    // Fill first available slot
-                    if(combinations[lengthIndex][j][k] == null)
-                    {
-                        combinations[lengthIndex][j][k] = i;
-                        break;
-                    }
+            // Index by path length. -1 because no 0 length paths
+            int lengthIndex = Integer.bitCount(i) - 1;
+            for(int k = 0; k<numCombos; k++) {
+                // Fill first available slot
+                if(combinations[lengthIndex][k] == null)
+                {
+                    combinations[lengthIndex][k] = i;
+                    break;
                 }
             }
         }
