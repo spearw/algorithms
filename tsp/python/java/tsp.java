@@ -19,15 +19,15 @@ public class tsp {
         tsp tsp = new tsp();
         String[] data = tsp.readFile("dat/tsp/tsp.txt");
         Double[][] euclideanDistances = tsp.calculateEuclideanDistances(data);
-        Integer[][] sets = tsp.generateSets();
 
-        Double answer = tsp.tsp(euclideanDistances, sets);
+        Double answer = tsp.tsp(euclideanDistances);
 
         System.out.println("Answer: " + answer);
         System.out.println("Time Elapsed: " + (System.nanoTime() - startTime) + " Nanoseconds");
     }
 
-    private Double tsp(Double[][] distances, Integer[][] sets){
+    private Double tsp(Double[][] distances){
+
 
         // Destination city index, path length indexed by bitmap value of cities leading to destination
         // No reason to include number of hops, since inherent in bitmap, and sets will insure I solve smalled subproblems first
@@ -36,6 +36,9 @@ public class tsp {
         // Can also throw away solutions after they're not needed. Solving 1 requires 0, solving 2 requires 1, etc.
         // Will make sense to wait to allocate only the memory needed, so create new array each loop, with the number of subproblems solved for that pathlength and a hashmap
         Double[][] pathLengths = new Double[this.numCities - 1][1 << this.numCities];
+
+        // Generate sets
+        Integer[][] sets = this.generateSets();
 
         // Storing final path lengths for each city for convenience
         Double[] finalLengths = new Double[numCities-1];
