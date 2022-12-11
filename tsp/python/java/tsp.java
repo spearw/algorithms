@@ -17,7 +17,7 @@ public class tsp {
 
         startTime = System.nanoTime();
         tsp tsp = new tsp();
-        String[] data = tsp.readFile("dat/tsp/t2.txt");
+        String[] data = tsp.readFile("dat/tsp/tsp.txt");
         Double[][] euclideanDistances = tsp.calculateEuclideanDistances(data);
         Integer[][] sets = tsp.generateSets();
 
@@ -68,13 +68,14 @@ public class tsp {
                     }
 
                     // Init array for holding possible path lengths
-                    Double[] lengths = new Double[i + 1];
+//                    Double[] lengths = new Double[i + 1];
+                    List<Double> lengths = new ArrayList<>(i + 1);
                     // Init counter to break loop when lengths is full
                     int counter = 0;
                     // Iterate through cities in bitmask
                     for (int l = 31; l >= 0; l--) {
                         // If lengths is full, break this loop
-                        if (counter == lengths.length){
+                        if (counter == i + 1){
                             break;
                         }
                         int bit = (bitmask >> l) & 1;
@@ -83,23 +84,11 @@ public class tsp {
                             // 1 << j will be bitwise representation of single city. Invert and call and to get set excluding current city
                             // final hop distance indexes are +1 because distances includes starting city
                             // Combine path length and final hop to get total distance
-                            double len = pathLengths[l][(~(1<<l) & bitmask)] + distances[l+1][j+1];
-
-                            // Fill first available slot
-                            for (int p = 0; p < lengths.length; p++){
-                                if(lengths[p] == null){
-                                    lengths[p] = len;
-                                    // Increment counter
-                                    counter++;
-                                    break;
-                                }
-                            }
-
+                            lengths.add(pathLengths[l][(~(1<<l) & bitmask)] + distances[l+1][j+1]);
                         }
                     }
 
-                    List<Double> dList = Arrays.asList(lengths);
-                    Double min = Collections.min(dList);
+                    Double min = Collections.min(lengths);
 
                     // Adding index based on mask used to create path length
                     pathLengths[j][bitmask] = min;
