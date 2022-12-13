@@ -70,9 +70,8 @@ public class tsp {
                         continue;
                     }
 
-                    // Init array for holding possible path lengths
-//                    Double[] lengths = new Double[i + 1];
-                    List<Double> lengths = new ArrayList<>(i + 1);
+                    // Init min path length
+                    Double min = Double.POSITIVE_INFINITY;
                     // Init counter to break loop when lengths is full
                     int counter = 0;
                     // Iterate through cities in bitmask
@@ -87,11 +86,9 @@ public class tsp {
                             // 1 << j will be bitwise representation of single city. Invert and call and to get set excluding current city
                             // final hop distance indexes are +1 because distances includes starting city
                             // Combine path length and final hop to get total distance
-                            lengths.add(pathLengths[l][(~(1<<l) & bitmask)] + distances[l+1][j+1]);
+                            min = Math.min(min, pathLengths[l][(~(1<<l) & bitmask)] + distances[l+1][j+1]);
                         }
                     }
-
-                    Double min = Collections.min(lengths);
 
                     // Adding index based on mask used to create path length
                     pathLengths[j][bitmask] = min;
