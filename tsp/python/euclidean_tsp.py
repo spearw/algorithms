@@ -90,4 +90,4 @@ def calc_euclidean_distances(path):
 
 if __name__ == "__main__":
     # print(tsp(calc_euclidean_distances("dat/tsp/tsp.txt")))
-    print(tsp(calc_euclidean_distances("dat/tsp/t2.txt")))
+    print(tsp(calc_euclidean_distances("dat/tsp/t3.txt")))
