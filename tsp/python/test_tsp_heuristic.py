@@ -1,10 +1,10 @@
 import unittest
-from tsp_heuristic import tsp_heuristic as tsp
+from tsp.python.tsp_heuristic import tsp_heuristic as tsp
 
 class TestStringMethods(unittest.TestCase):
 
     def test_tsp(self):
-        self.assertEqual(tsp.tsp(tsp.calc_euclidean_distances("dat/tsp/t1.txt")), 10.24)
+        self.assertEqual(tsp("dat/tsp_heuristic/t1.txt"), [1, 3, 2, 5, 6, 4, 1])
 
 if __name__ == '__main__':
     unittest.main()
