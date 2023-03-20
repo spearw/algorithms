@@ -6,26 +6,31 @@ def tsp_heuristic(path):
 
     num_cities = int(remaining_cities.pop(0))
 
-    # Grab first line, convert to tuple
-    current_city = tuple(map(float, remaining_cities.pop(0).split(' ')))
+    first_city = [0, remaining_cities.pop(0)]
+
+    current_city = first_city
     path = [1]
+    pathlength = 0.0
 
     while len(remaining_cities) > 0:
-        current_city = find_closest_city(current_city, remaining_cities)
-        remaining_cities.remove(f"{int(current_city[0])} {current_city[1]} {current_city[2]}")
-        path.append(int(current_city[0]))
+        current_city = find_closest_city(current_city[1], remaining_cities)
+        remaining_cities.remove(current_city[1])
+        path.append(int(current_city[1].split(' ')[0]))
+        pathlength += current_city[0]
 
-    path.append(1)
-    return path
+    current_city = find_closest_city(current_city[1], [first_city[1]])
+    path.append(int(current_city[1].split(' ')[0]))
+    pathlength += current_city[0]
+    return path, pathlength
 
 def find_closest_city(current_city, remaining_cities):
     distances = {}
-    cord1 = current_city
+    cord1 = tuple(map(float, current_city.split(' ')))
     for city in remaining_cities:
         cord2 = tuple(map(float, city.split(' ')))
-        distances[cord2[0]] = [dist(cord1[1:], cord2[1:]), cord2]
+        distances[cord2[0]] = [dist(cord1[1:], cord2[1:]), city]
     next_city = min(distances, key=distances.get)
-    return distances[next_city][1]
+    return distances[next_city]
 
 
 def calc_euclidean_distances(path):
@@ -49,4 +54,4 @@ def calc_euclidean_distances(path):
 
 if __name__ == "__main__":
     # print(tsp(calc_euclidean_distances("dat/tsp/tsp.txt")))
-    print(tsp_heuristic("dat/tsp_heuristic/t1.txt"))
+    print(tsp_heuristic("dat/tsp_heuristic/nn.txt"))
